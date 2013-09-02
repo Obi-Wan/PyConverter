@@ -8,6 +8,7 @@ from PyQt4 import QtGui
 
 import sys
 import os
+import glob
 
 import converter
 
@@ -68,17 +69,22 @@ class Navigator(QtGui.QWidget):
         if os.path.isdir(self.pedit.text()):
             directory = self.pedit.text()
         else:
-            directory = os.path.dirname(self.pedit.text())
-        file_path = QtGui.QFileDialog.getOpenFileName(parent = self, caption = "Bene", \
+            directory = os.path.dirname(str(self.pedit.text()))
+        file_path = QtGui.QFileDialog.getOpenFileName(parent = self, \
+                                                      caption = "Select files", \
                                                       directory = directory, \
                                                       filter = "Video (*.flv *.mp4)")
         self.pedit.setText(file_path)
 
     def convertFiles(self):
-        conv = converter.Converter(default_sampling = str(self.scomb.currentText()), \
-                                   default_bitrate = str(self.bcomb.currentText()), \
-                                   default_format = str(self.fcomb.currentText()) )
-        conv.convert(file_name = str(self.pedit.text()))
+        path_convert = str(self.pedit.text())
+        if os.path.isdir(path_convert):
+            path_convert = os.path.join(path_convert, "*")
+        files = glob.glob(pathname=path_convert)
+        conv = converter.BatchConverter(default_sampling = str(self.scomb.currentText()), \
+                                   default_bitrate = str(self.bcomb.currentText()) )
+        conv.convert(list_of_files = files, \
+                     new_format = str(self.fcomb.currentText()))
 
     def center(self):
         qr = self.frameGeometry()
